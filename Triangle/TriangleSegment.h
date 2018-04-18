@@ -1,13 +1,11 @@
-#ifndef LAB2_SEGMENT_H
-#define LAB2_SEGMENT_H
 //*******************************************
 //    Lab task 4
 //    Developed by Taras Martynyuk
 //    on 2/15/2018
 //    Version .5
 //*******************************************
-
-//region Segment
+#ifndef LAB2_SEGMENT_H
+#define LAB2_SEGMENT_H
 
 class Triangle::Segment
 {
@@ -30,6 +28,5 @@ private:
     Segment& operator=(const Segment&);
 };
 std::ostream& operator<<(std::ostream &, const Triangle::Segment &);
-//endregion
 
 #endif //LAB2_SEGMENT_H

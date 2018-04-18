@@ -9,10 +9,6 @@
 
 Vector2D::Vector2D(double x, double y) : x_(x), y_(y) {}
 
-Vector2D::Vector2D(const Triangle::Segment& segment) :
-        Vector2D(segment.end().x() - segment.start().x(),
-            segment.end().y() - segment.start().y()) {}
-
 Vector2D::Vector2D(const Point& start, const Point& end) :
         Vector2D(end.x() - start.x(), end.y() - start.y() ) {}
 //endregion
@@ -38,7 +34,6 @@ double& Vector2D::y()
     return y_;
 }
 //endregion
-
 //region methods
 
 double Vector2D::magnitude()
@@ -56,24 +51,25 @@ void Vector2D::normalize()
 //endregion
 //region operators
 
-const Point operator+(const Point& p, const Vector2D& v)
+const Point operator+ (const Point& p, const Vector2D& v)
 {
     return Point(p.x() + v.x(), p.y() + v.y());
 }
 
-const Vector2D operator*(const Vector2D& v, double scalar)
+const Vector2D operator* (const Vector2D& v, double scalar)
 {
     return Vector2D(v.x() * scalar, v.y() * scalar);
 }
 
-std::ostream& operator<<(std::ostream& o, const Vector2D& v)
+std::ostream& operator<< (std::ostream& o, const Vector2D& v)
 {
     o << "(" << v.x() << ", " << v.y() << ");" << '\n';
 }
+
+const Vector2D operator/ (const Vector2D& vec, double sc)
+{
+    return Vector2D(vec.x() / sc, vec.y() / 2);
+}
 //endregion
 
-Vector2D opposite(const Vector2D& vec)
-{
-    return {- vec.x(), - vec.y()};
-}
 

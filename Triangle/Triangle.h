@@ -1,20 +1,20 @@
-#ifndef LAB4_TRIANGLE_H
-#define LAB4_TRIANGLE_H
-#include <iostream>
-#include "Point.h"
-#include "IndependentSegment.h"
 //*******************************************
 //    Lab task 4
 //    Developed by Taras Martynyuk
 //    on 2/15/2018
 //    Version .5
-//*******************************************
 //class Point;
+//*******************************************
+#ifndef LAB4_TRIANGLE_H
+#define LAB4_TRIANGLE_H
+#include <iostream>
+#include <IndependentSegment.h>
+#include "Point.h"
 
 class Triangle
 {
 public:
-    class Segment;
+    class Side;
     //region ctors
 
     explicit Triangle(const double x1=0, const double y1=0,
@@ -27,64 +27,77 @@ public:
 
     //endregion
 
+    typedef const Side& (Triangle::* SideGetter)() const;
+
     double perimeter() const;
     double area() const;
+
+    //region accessors
 
     const Point& apexA() const;
     const Point& apexB() const;
     const Point& apexC() const;
+    Point& apexA();
+    Point& apexB();
+    Point& apexC();
 
-    const Triangle::Segment& sideA() const;
-    const Triangle::Segment& sideB() const;
-    const Triangle::Segment& sideC() const;
+    const Side& sideAB() const;
+    const Side& sideBC() const;
+    const Side& sideAC() const;
+
+    const ::Segment& medianAB();
+    const ::Segment& medianBC();
+    const ::Segment& medianAC();
+
+    //endregion
 // for the length of the sides, just use Triangle.side{sideVertex}.length()
 
 private:
-//    using Apex = const Point Triangle::* const;
-//    using HeightEnd = Point* Triangle::* const;
-    typedef  const Point Triangle::* const Apex;
-    typedef Point* Triangle::* const HeightEnd;
-    typedef const Triangle::Segment& (Triangle::* SideGetter)() const;
+    using Apex = const Point Triangle::* const;
+    using HeightEnd = Point* Triangle::* const;
+//    typedef  const Point Triangle::* const Apex;
+//    typedef Point* Triangle::* const HeightEnd;
 
-    const Point a_, b_, c_;
-    mutable Triangle::Segment *ab_, *bc_, *ac_;
-    mutable ::Segment *median_ab, *median_bc, *median_ac;
+    Point a_, b_, c_;
+    mutable Side *ab_, *bc_, *ac_;
+    mutable ::Segment *median_ab_, *median_bc_, *median_ac_;
 
     // not implemented - our triangle is readonly
     Triangle& operator=(const Triangle&);
 
+    // creates new median segment, whose start is apex opposie the side,
+    // and end is the center of the side
+//    const ::Segment& median(SideGetter);
+    ::Segment* createMedian(SideGetter);
     SideGetter getSideOppositeApex(Apex) const;
 };
 
-//#include "TriangleSegment.h"
 std::ostream& operator<<(std::ostream &, const Triangle &);
 
 //region Segment
 
-class Triangle::Segment
+class Triangle::Side
 {
 public:
-    Segment(const Point & start, const Point & end);
-    Segment(const Segment &);
-    ~Segment();
+    Side(const Point & start, const Point & end);
+    ~Side();
 
     const Point& start() const;
     const Point& end() const;
 
     double length () const;
+    ::Segment toIndependentSegment();
 
 private:
     // the references are readonly!
-    // so we can't modify apexes from the segment
+    // so we can't modify apexes from the segment:
+    // the binding apex -> segment is one-way!
     const Point& _start;
     const Point& _end;
-    // No assignment - the binding apex -> segment is one-way!
-    Segment& operator=(const Segment&);
+    // No assignment -
+    Side& operator=(const Side&);
 };
-std::ostream& operator<<(std::ostream &, const Triangle::Segment &);
+std::ostream& operator<<(std::ostream &, const Triangle::Side &);
 //endregion
-
-
-//#include "TriangleSegment.h"
 #endif //LAB4_TRIANGLE_H
 

@@ -3,16 +3,15 @@
 //
 #ifndef FINALTEST_INDEPENDENTSEGMENT_H
 #define FINALTEST_INDEPENDENTSEGMENT_H
-
 #ifndef LAB2_SEGMENT_H
 #define LAB2_SEGMENT_H
+
 #include "Point.h"
 
 class Segment
 {
 public:
     Segment(const Point& start, const Point& end);
-//    Segment(const Segment&);
     ~Segment();
 
     // let's make them too readonly for this task
@@ -27,10 +26,10 @@ private:
     const Point _end;
     Segment& operator=(const Segment&);
 };
+
 std::ostream& operator<<(std::ostream &, const ::Segment &);
 
+Point center(const ::Segment&);
+
 #endif //LAB2_SEGMENT_H
-
-
-
 #endif //FINALTEST_INDEPENDENTSEGMENT_H

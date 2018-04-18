@@ -5,6 +5,6 @@ set(CMAKE_CXX_STANDARD 11)
 
 FILE(GLOB sources ./*.cpp ./*.h  */*.cpp */*.h */*/*.cpp */*/*.h)
 
-include_directories(. Triangle Triangle/Utils)
+include_directories(. Triangle Triangle/Utils TriangleTest)
 add_executable(FinalTest ${sources})
 

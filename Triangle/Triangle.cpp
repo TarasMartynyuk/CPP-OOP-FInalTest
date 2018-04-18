@@ -5,11 +5,7 @@
 #include <cassert>
 #include "Triangle.h"
 #include "Vector2D.h"
-//region defs
-
-Vector2D unitPerpendicularFromPointToSegment(const Point& start, const Triangle::Segment& segment);
-double cumulativeFarness(const Point& static_point_a, const Point& static_point_b, const Point& moving_point);
-//endregion
+#include "vector_utils.h"
 
 //region ctors
 
@@ -51,63 +47,103 @@ const Point& Triangle::apexC() const
     return c_;
 }
 
-const Triangle::Segment& Triangle::sideA() const
+Point& Triangle::apexA()
+{
+    return a_;
+}
+
+Point& Triangle::apexB()
+{
+    return b_;
+}
+
+Point& Triangle::apexC()
+{
+    return c_;
+}
+
+const Triangle::Side& Triangle::sideBC() const
 {
     if(bc_ == nullptr)
     {
-        bc_ = new Segment(b_, c_);
+        bc_ = new Side(b_, c_);
     }
     return *bc_;
 }
 
-const Triangle::Segment& Triangle::sideB() const
+const Triangle::Side& Triangle::sideAC() const
 {
     if(ac_ == nullptr)
     {
-        ac_ = new Segment(a_, c_);
+        ac_ = new Side(a_, c_);
     }
     return *ac_;
 }
 
-const Triangle::Segment& Triangle::sideC() const
+const Triangle::Side& Triangle::sideAB() const
 {
     if(ab_ == nullptr)
     {
-        ab_ = new Segment(a_, b_);
+        ab_ = new Side(a_, b_);
     }
     return *ab_;
+}
+
+const ::Segment& Triangle::medianAB()
+{
+    if(median_ab_ == nullptr)
+        { median_ab_ = createMedian(&Triangle::sideAB); }
+
+    return *median_ab_;
+}
+
+const ::Segment& Triangle::medianBC()
+{
+    if(median_bc_ == nullptr)
+        { median_bc_ = createMedian(&Triangle::sideBC); }
+
+    return *median_bc_;
+}
+
+const ::Segment& Triangle::medianAC()
+{
+    if(median_ac_ == nullptr)
+        { median_ac_ = createMedian(&Triangle::sideAC); }
+
+    return *median_ac_;
 }
 //endregion
 //region methods
 
 double Triangle::perimeter() const
 {
-    return sideA().length() + sideB().length() + sideC().length();
+    SideGetter side = &Triangle::sideBC;
+    auto sref =  (this->*side)();
+    return sideBC().length() + sideAC().length() + sideAB().length();
 }
 
 double Triangle::area() const
 {
     double half_perim = perimeter() / 2;
-    return sqrt(half_perim * (half_perim - sideA().length()) *
-                        (half_perim - sideB().length()) * (half_perim - sideC().length()));
+    return sqrt(half_perim * (half_perim - sideBC().length()) *
+                        (half_perim - sideAC().length()) * (half_perim - sideAB().length()));
 }
 
-
-//region height construction
+//region median
 
 Triangle::SideGetter Triangle::getSideOppositeApex(Apex apex) const
 {
     if(apex == &Triangle::a_)
     {
-        return &Triangle::sideA;
+        return &Triangle::sideBC;
     }
     else if(apex == &Triangle::b_)
     {
-        return &Triangle::sideB;
+        return &Triangle::sideAC;
     }
     else if(apex == &Triangle::c_)
     {
-        return &Triangle::sideC;
+        return &Triangle::sideAB;
     }
     else
     {
@@ -115,81 +151,48 @@ Triangle::SideGetter Triangle::getSideOppositeApex(Apex apex) const
     }
 }
 
-// the vector can point towards or away from the segment
-Vector2D unitPerpendicularFromPointToSegment(const Point& start, const Triangle::Segment& segment)
+Segment* Triangle::createMedian(Triangle::SideGetter sideGetter)
 {
-    Vector2D side_vector(segment);
-    assert(side_vector.x() != 0 || side_vector.y() != 0);
+    const Side& side = (this->*sideGetter)();
 
-    //(0,5)
-    // we care only about direction, so let's use a random x to solve the equation
-    double p_vec_x;
-    double p_vec_y;
-    // perpendicular_vector * side_vector = 0
-    if(side_vector.x() == 0)
-    {
-        // 0 * pv.x + sv.y * pv.y = 0;
-        //sv.y * pv.y = 0  && sv.y != 0 => pv.y = 0
-        // arbitrary x
-        p_vec_x = 1;
-        p_vec_y = 0;
-    }
-    else
-    {
-        // sgb.x * pv.x + sgv.y(can be 0) * pv.y = 0;
-        p_vec_y = 1;
-        p_vec_x = - (side_vector.y() * p_vec_y) / side_vector.x();
-    }
-
-    Vector2D perpendicular_vector(p_vec_x, p_vec_y);
-    assert(perpendicular_vector.x() * side_vector.x()  +  perpendicular_vector.y() * side_vector.y() == 0);
-
-    perpendicular_vector.normalize();   // it is now a unit vector with needed direction
-    return perpendicular_vector;
-}
-
-// function which accesses the distance from the 3d point to the first 2
-double cumulativeFarness(const Point& static_point_a, const Point& static_point_b, const Point& moving_point)
-{
-    const double distance_from_a = Vector2D(static_point_a, moving_point).magnitude();
-    const double distance_from_b = Vector2D(static_point_b, moving_point).magnitude();
-    return distance_from_a + distance_from_b;
 }
 
 //endregion
 //endregion
 
-//region Segment
+//region Side
+//region ctors
 
-Triangle::Segment::Segment(const Point& start, const Point& end)
+Triangle::Side::Side(const Point& start, const Point& end)
     : _start(start), _end(end)
 {}
 
-Triangle::Segment::Segment(const Triangle::Segment& other)
-    : Segment(other.start(), other.end())
-{}
-
-Triangle::Segment::~Segment(){}
+Triangle::Side::~Side(){}
 //endregion
-
 //region getters & setters
-const Point& Triangle::Segment::start() const
+
+const Point& Triangle::Side::start() const
 {
     return _start;
 }
 
-const Point& Triangle::Segment::end() const
+const Point& Triangle::Side::end() const
 {
     return _end;
 }
 //endregion
 
-double Triangle::Segment::length() const
+double Triangle::Side::length() const
 {
     return sqrt( pow(_end.x() - _start.x(), 2) + pow(_end.y() - _start.y(), 2) );
 }
 
-std::ostream& operator<<(std::ostream &, const Triangle::Segment& segment)
+::Segment Triangle::Side::toIndependentSegment()
+{
+    return ::Segment(start(), end());
+}
+
+std::ostream& operator<<(std::ostream &, const Triangle::Side& segment)
 {
     std::cout << "\n\t(" << segment.start() << ", " << segment.end() << ");";
 }
