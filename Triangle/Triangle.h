@@ -37,9 +37,10 @@ public:
     const Point& apexA() const;
     const Point& apexB() const;
     const Point& apexC() const;
-    Point& apexA();
-    Point& apexB();
-    Point& apexC();
+    void setApexA(const Point&);
+    void setApexB(const Point&);
+    void setApexC(const Point&);
+
 
     const Side& sideAB() const;
     const Side& sideBC() const;
@@ -65,15 +66,12 @@ private:
     // not implemented - our triangle is readonly
     Triangle& operator=(const Triangle&);
 
-    // creates new median segment, whose start is apex opposite the side,
-    // and end is the center of the side
-
-    // computes the median end for side from current apexes,
-    // instantiates the median end for the side with that value
-    // and instantiates corresponding median segment from that median end
-    const Side& instantiateMedianObject(
+    // if the median obj, pointer to by median
+    // is not instantiated, creates the median end
+    // from current apexes, and instantiates it
+    const Side& getMedian(
         const Side& side, const Point&,
-        Point* &, Side* &);
+        Point*&, Side*& median);
     Point* createMedianEnd(const Side&);
 
     // updates the existing median end and median objects
@@ -82,10 +80,13 @@ private:
     void updateMedianEnd(Point* const p, const Side& side);
 
     //deletes and sets to null
+    void deleteMedianEnds();
+    //deletes and sets to null
     void deleteMedians();
     //deletes and sets to null
     void deleteSides();
     void nullifySides();
+    void nullifyMedianEnds();
     void nullifyMedians();
 };
 
@@ -111,7 +112,10 @@ private:
     // the binding apex -> segment is one-way!
     const Point& _start;
     const Point& _end;
-    // No assignment -
+    // No assignment or copying
+    // the copies would be bound to our object's aggregate points,
+    // which will be deleted with our triangle, possibly before the deletion of the copy
+    Side(const Side&);
     Side& operator=(const Side&);
 };
 

@@ -29,7 +29,7 @@ const Point& Segment::end() const
 
 double Segment::length() const
 {
-    return sqrt( pow(_end.x() - _start.x(), 2) + pow(_end.y() - _start.y(), 2) );
+    return distance(start(), end());
 }
 
 std::ostream& operator<<(std::ostream &, const Segment& segment)
@@ -42,4 +42,15 @@ Point center(const Segment& segment)
     Vector2D dir = toVector2D(segment).normalize();
 
     return segment.start() + (dir * (segment.length() / 2));
+}
+
+bool operator==(const Segment& left, const Segment& right)
+{
+    return left.start() == right.start() &&
+       left.end() == right.end();
+}
+
+bool operator!=(const Segment& left, const Segment& right)
+{
+    return ! (left == right);
 }

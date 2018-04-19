@@ -5,6 +5,8 @@
 #define FINALTEST_TRIANGLE_TEST_H
 
 void run_all_triangle_tests();
+
+void median_divides_side_evenly();
 void start_of_median_eq_opposite_apex();
 void median_changes_on_apex_change();
 

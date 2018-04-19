@@ -19,6 +19,7 @@ Triangle::Triangle(const Point& a, const Point& b, const Point& c)
     : a_(a), b_(b), c_(c)
 {
     nullifySides();
+    nullifyMedianEnds();
     nullifyMedians();
 }
 
@@ -28,6 +29,7 @@ Triangle::Triangle(const Triangle& other)
 
 Triangle::~Triangle()
 {
+    deleteMedianEnds();
     deleteMedians();
     deleteSides();
 }
@@ -49,19 +51,22 @@ const Point& Triangle::apexC() const
     return c_;
 }
 
-Point& Triangle::apexA()
+void Triangle::setApexA(const Point& newApex)
 {
-    return a_;
+    a_ = newApex;
+    updatePresentMedianEnds();
 }
 
-Point& Triangle::apexB()
+void Triangle::setApexB(const Point& newApex)
 {
-    return b_;
+    b_ = newApex;
+    updatePresentMedianEnds();
 }
 
-Point& Triangle::apexC()
+void Triangle::setApexC(const Point& newApex)
 {
-    return c_;
+    c_ = newApex;
+    updatePresentMedianEnds();
 }
 
 const Triangle::Side& Triangle::sideBC() const
@@ -93,25 +98,20 @@ const Triangle::Side& Triangle::sideAB() const
 
 const Triangle::Side& Triangle::medianAB()
 {
-    //
-    if(median_ab_end == nullptr)
-    {
-        median_ab_end = createMedianEnd(sideAB());
-        assert(median_ab_ == nullptr);
-        median_ab_ = new Side(apexC(), *median_ab_end);
-    }
-
-    return *median_ab_;
+    return getMedian(sideAB(), apexC(),
+        median_ab_end, median_ab_);
 }
 
 const Triangle::Side& Triangle::medianBC()
 {
-    if(median_bc_end == nullptr)
-    {
+    return getMedian(sideBC(), apexA(),
+        median_bc_end, median_bc_);
+}
 
-    }
-
-    return *median_bc_;
+const Triangle::Side& Triangle::medianAC()
+{
+    return getMedian(sideAC(), apexB(),
+        median_ac_end, median_ac_);
 }
 
 //endregion
@@ -131,7 +131,7 @@ double Triangle::area() const
 
 //region median
 
-const Triangle::Side& Triangle::instantiateMedianObject(
+const Triangle::Side& Triangle::getMedian(
     const Triangle::Side& side,
     const Point& opposite_apex,
     Point*& median_end,
@@ -154,16 +154,30 @@ Point* Triangle::createMedianEnd(const Triangle::Side& side)
 
 void Triangle::updatePresentMedianEnds()
 {
+    if(median_ab_end != nullptr)
+        { updateMedianEnd(median_ab_end, sideAB()); }
 
+    if(median_bc_end != nullptr)
+        { updateMedianEnd(median_bc_end, sideBC()); }
+
+    if(median_ac_end != nullptr)
+        { updateMedianEnd(median_ac_end, sideAC()); }
 }
 
 void Triangle::updateMedianEnd(Point* const apex, const Side& side)
 {
     *apex = center(side.toIndependentSegment());
 }
-
 //endregion
 //region disposing
+
+void Triangle::deleteMedianEnds()
+{
+    delete median_ab_end;
+    delete median_bc_end;
+    delete median_ac_end;
+    nullifyMedianEnds();
+}
 
 void Triangle::deleteMedians()
 {
@@ -186,6 +200,13 @@ void Triangle::nullifySides()
     ab_ = nullptr;
     bc_ = nullptr;
     ac_ = nullptr;
+}
+
+void Triangle::nullifyMedianEnds()
+{
+    median_ab_end = nullptr;
+    median_bc_end = nullptr;
+    median_ac_end = nullptr;
 }
 
 void Triangle::nullifyMedians()
@@ -222,7 +243,7 @@ const Point& Triangle::Side::end() const
 
 double Triangle::Side::length() const
 {
-    return sqrt( pow(_end.x() - _start.x(), 2) + pow(_end.y() - _start.y(), 2) );
+    return distance(start(), end());
 }
 
 ::Segment Triangle::Side::toIndependentSegment() const

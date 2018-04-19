@@ -7,7 +7,7 @@ using namespace std;
 
 int main()
 {
-//    run_all_triangle_tests();
+    run_all_triangle_tests();
 
 
     return 0;

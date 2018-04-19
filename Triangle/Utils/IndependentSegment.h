@@ -27,6 +27,9 @@ private:
 };
 
 std::ostream& operator<<(std::ostream &, const ::Segment &);
+bool operator==(const Segment&, const Segment&);
+bool operator!=(const Segment&, const Segment&);
+
 
 Point center(const ::Segment&);
 
