@@ -22,7 +22,7 @@ public:
     double& y();
 
     // should these methods create a copy instead?
-    void normalize();
+    const Vector2D& normalize();
     double magnitude();
 
 private:

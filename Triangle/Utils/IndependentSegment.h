@@ -5,7 +5,6 @@
 #define FINALTEST_INDEPENDENTSEGMENT_H
 #ifndef LAB2_SEGMENT_H
 #define LAB2_SEGMENT_H
-
 #include "Point.h"
 
 class Segment

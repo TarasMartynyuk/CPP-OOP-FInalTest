@@ -41,11 +41,13 @@ double Vector2D::magnitude()
     return sqrt(x() * x() + y() * y());
 }
 
-void Vector2D::normalize()
+const Vector2D& Vector2D::normalize()
 {
     double mag = magnitude();
     x() /= mag;
     y() /= mag;
+
+    return *this;
 }
 
 //endregion

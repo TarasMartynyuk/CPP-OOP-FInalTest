@@ -27,7 +27,7 @@ public:
 
     //endregion
 
-    typedef const Side& (Triangle::* SideGetter)() const;
+//    typedef const Side& (Triangle::* SideGetter)() const;
 
     double perimeter() const;
     double area() const;
@@ -45,31 +45,48 @@ public:
     const Side& sideBC() const;
     const Side& sideAC() const;
 
-    const ::Segment& medianAB();
-    const ::Segment& medianBC();
-    const ::Segment& medianAC();
+    const Side& medianAB();
+    const Side& medianBC();
+    const Side& medianAC();
 
     //endregion
 // for the length of the sides, just use Triangle.side{sideVertex}.length()
 
 private:
-    using Apex = const Point Triangle::* const;
-    using HeightEnd = Point* Triangle::* const;
-//    typedef  const Point Triangle::* const Apex;
-//    typedef Point* Triangle::* const HeightEnd;
+//    using ApexMPtr = const Point Triangle::* const;
+//    using MedianEndMPtr = Point* Triangle::* const;
+//    using SideMPTr = Side* Triangle::* const;
 
     Point a_, b_, c_;
+    mutable Point *median_ab_end, *median_bc_end, *median_ac_end;
     mutable Side *ab_, *bc_, *ac_;
-    mutable ::Segment *median_ab_, *median_bc_, *median_ac_;
+    mutable Side *median_ab_, *median_bc_, *median_ac_;
 
     // not implemented - our triangle is readonly
     Triangle& operator=(const Triangle&);
 
-    // creates new median segment, whose start is apex opposie the side,
+    // creates new median segment, whose start is apex opposite the side,
     // and end is the center of the side
-//    const ::Segment& median(SideGetter);
-    ::Segment* createMedian(SideGetter);
-    SideGetter getSideOppositeApex(Apex) const;
+
+    // computes the median end for side from current apexes,
+    // instantiates the median end for the side with that value
+    // and instantiates corresponding median segment from that median end
+    const Side& instantiateMedianObject(
+        const Side& side, const Point&,
+        Point* &, Side* &);
+    Point* createMedianEnd(const Side&);
+
+    // updates the existing median end and median objects
+    // computing new values from current apexes
+    void updatePresentMedianEnds();
+    void updateMedianEnd(Point* const p, const Side& side);
+
+    //deletes and sets to null
+    void deleteMedians();
+    //deletes and sets to null
+    void deleteSides();
+    void nullifySides();
+    void nullifyMedians();
 };
 
 std::ostream& operator<<(std::ostream &, const Triangle &);
@@ -86,7 +103,7 @@ public:
     const Point& end() const;
 
     double length () const;
-    ::Segment toIndependentSegment();
+    ::Segment toIndependentSegment() const ;
 
 private:
     // the references are readonly!
@@ -97,6 +114,9 @@ private:
     // No assignment -
     Side& operator=(const Side&);
 };
+
+
+
 std::ostream& operator<<(std::ostream &, const Triangle::Side &);
 //endregion
 #endif //LAB4_TRIANGLE_H

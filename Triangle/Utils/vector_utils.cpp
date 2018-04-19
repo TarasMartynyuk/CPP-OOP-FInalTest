@@ -8,7 +8,6 @@ Vector2D opposite(const Vector2D& vec)
 {
     return {- vec.x(), - vec.y()};
 }
-
 //Vector2D unitPerpendicularFromPointToSegment(const Point& start, const Triangle::Segment& segment)
 //{
 //    Vector2D side_vector = toVector2D(segment);

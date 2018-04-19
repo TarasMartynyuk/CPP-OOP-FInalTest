@@ -27,12 +27,7 @@ public:
     const double& x()const;
     const double& y()const;
 
-    const int getID() const;
-    static int amount();
-
 private:
-    static int freeID;
-    const int pointID;
     double _x;
     double _y;
 };

@@ -9,15 +9,18 @@
 
 //region ctors
 
-Triangle::Triangle(const double x1, const double y1, const double x2, const double y2, const double x3, const double y3)
-    : a_(x1, y1), b_(x2, y2), c_(x3, y3),
-      ab_(nullptr), bc_(nullptr), ac_(nullptr)
+Triangle::Triangle(const double x1, const double y1,
+    const double x2, const double y2,
+    const double x3, const double y3)
+    : Triangle(Point(x1, y1), Point(x2, y2), Point(x3, y3))
 {}
 
 Triangle::Triangle(const Point& a, const Point& b, const Point& c)
-    : a_(a), b_(b), c_(c),
-      ab_(nullptr), bc_(nullptr), ac_(nullptr)
-{}
+    : a_(a), b_(b), c_(c)
+{
+    nullifySides();
+    nullifyMedians();
+}
 
 Triangle::Triangle(const Triangle& other)
     : Triangle(other.apexA(), other.apexB(), other.apexC())
@@ -25,9 +28,8 @@ Triangle::Triangle(const Triangle& other)
 
 Triangle::~Triangle()
 {
-    delete ab_;
-    delete bc_;
-    delete ac_;
+    deleteMedians();
+    deleteSides();
 }
 //endregion
 //region accessors
@@ -89,36 +91,34 @@ const Triangle::Side& Triangle::sideAB() const
     return *ab_;
 }
 
-const ::Segment& Triangle::medianAB()
+const Triangle::Side& Triangle::medianAB()
 {
-    if(median_ab_ == nullptr)
-        { median_ab_ = createMedian(&Triangle::sideAB); }
+    //
+    if(median_ab_end == nullptr)
+    {
+        median_ab_end = createMedianEnd(sideAB());
+        assert(median_ab_ == nullptr);
+        median_ab_ = new Side(apexC(), *median_ab_end);
+    }
 
     return *median_ab_;
 }
 
-const ::Segment& Triangle::medianBC()
+const Triangle::Side& Triangle::medianBC()
 {
-    if(median_bc_ == nullptr)
-        { median_bc_ = createMedian(&Triangle::sideBC); }
+    if(median_bc_end == nullptr)
+    {
+
+    }
 
     return *median_bc_;
 }
 
-const ::Segment& Triangle::medianAC()
-{
-    if(median_ac_ == nullptr)
-        { median_ac_ = createMedian(&Triangle::sideAC); }
-
-    return *median_ac_;
-}
 //endregion
 //region methods
 
 double Triangle::perimeter() const
 {
-    SideGetter side = &Triangle::sideBC;
-    auto sref =  (this->*side)();
     return sideBC().length() + sideAC().length() + sideAB().length();
 }
 
@@ -131,30 +131,68 @@ double Triangle::area() const
 
 //region median
 
-Triangle::SideGetter Triangle::getSideOppositeApex(Apex apex) const
+const Triangle::Side& Triangle::instantiateMedianObject(
+    const Triangle::Side& side,
+    const Point& opposite_apex,
+    Point*& median_end,
+    Triangle::Side*& median)
 {
-    if(apex == &Triangle::a_)
+    if(median_end == nullptr)
     {
-        return &Triangle::sideBC;
+        median_end = createMedianEnd(side);
+        assert(median == nullptr);
+        median = new Side(opposite_apex, *median_end);
     }
-    else if(apex == &Triangle::b_)
-    {
-        return &Triangle::sideAC;
-    }
-    else if(apex == &Triangle::c_)
-    {
-        return &Triangle::sideAB;
-    }
-    else
-    {
-        throw std::invalid_argument("passed member pointer is not one of the apexes");
-    }
+
+    return *median;
 }
 
-Segment* Triangle::createMedian(Triangle::SideGetter sideGetter)
+Point* Triangle::createMedianEnd(const Triangle::Side& side)
 {
-    const Side& side = (this->*sideGetter)();
+    return new Point(center(side.toIndependentSegment()));
+}
 
+void Triangle::updatePresentMedianEnds()
+{
+
+}
+
+void Triangle::updateMedianEnd(Point* const apex, const Side& side)
+{
+    *apex = center(side.toIndependentSegment());
+}
+
+//endregion
+//region disposing
+
+void Triangle::deleteMedians()
+{
+    delete median_ab_;
+    delete median_bc_;
+    delete median_ac_;
+    nullifyMedians();
+}
+
+void Triangle::deleteSides()
+{
+    delete ab_;
+    delete bc_;
+    delete ac_;
+    nullifySides();
+}
+
+void Triangle::nullifySides()
+{
+    ab_ = nullptr;
+    bc_ = nullptr;
+    ac_ = nullptr;
+}
+
+void Triangle::nullifyMedians()
+{
+    median_ab_ = nullptr;
+    median_bc_ = nullptr;
+    median_ac_ = nullptr;
 }
 
 //endregion
@@ -187,7 +225,7 @@ double Triangle::Side::length() const
     return sqrt( pow(_end.x() - _start.x(), 2) + pow(_end.y() - _start.y(), 2) );
 }
 
-::Segment Triangle::Side::toIndependentSegment()
+::Segment Triangle::Side::toIndependentSegment() const
 {
     return ::Segment(start(), end());
 }

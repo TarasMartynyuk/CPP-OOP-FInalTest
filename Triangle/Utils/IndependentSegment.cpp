@@ -39,6 +39,7 @@ std::ostream& operator<<(std::ostream &, const Segment& segment)
 
 Point center(const Segment& segment)
 {
-    Vector2D half_diff = toVector2D(segment) / 2;
-    return segment.start() + half_diff;
+    Vector2D dir = toVector2D(segment).normalize();
+
+    return segment.start() + (dir * (segment.length() / 2));
 }

@@ -5,22 +5,15 @@
 using  namespace std;
 
 //region Constructors
-int Point::freeID = 0;
 
-Point::Point(double x, double y) : _x{x}, _y{y}, pointID{freeID}
-{
-    freeID++;
-    cout << "Created new Point :" << *this << '\n';
-}
+Point::Point(double x, double y) : _x{x}, _y{y}
+{}
 
 Point::Point(const Point &other) : Point(other.x(), other.y()) {}
 
 Point::~Point()
-{
-    cout << "Deleted Point :" << *this << '\n';
-}
+{}
 //endregion
-
 //region field access
 
 const double& Point::x()const
@@ -43,18 +36,7 @@ double& Point::y()
     return this->_y;
 }
 
-const int Point::getID() const
-{
-    return this->pointID;
-}
-
-int Point::amount()
-{
-   return freeID;
-}
-
 //endregion
-
 //region Operators
 
 Point& Point::operator=(const Point & other)
@@ -66,7 +48,7 @@ Point& Point::operator=(const Point & other)
 
 ostream& operator<<(ostream& stream, const Point& point)
 {
-    stream << "(" << point.x() << ", " << point.y() << ") ID: " << point.getID();
+    stream << "(" << point.x() << ", " << point.y() << ")";
     return  stream;
 }
 
